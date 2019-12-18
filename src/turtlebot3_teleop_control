@@ -1,74 +1,45 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2011, Willow Garage, Inc.
+# Copyright (c) 2019, zyq_hit, Inc.
 # All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-#    * Redistributions of source code must retain the above copyright
-#      notice, this list of conditions and the following disclaimer.
-#    * Redistributions in binary form must reproduce the above copyright
-#      notice, this list of conditions and the following disclaimer in the
-#      documentation and/or other materials provided with the distribution.
-#    * Neither the name of the Willow Garage, Inc. nor the names of its
-#      contributors may be used to endorse or promote products derived from
-#       this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-import rospy
-import traceback
+# This is a simple example to show how to use turtlebot_class moudle
+# From this sample you can know how to control the turtlebot by keyboard
+
 from geometry_msgs.msg import Twist
-import sys, os
-import select as se
-import math
 from nav_msgs.msg import Odometry
-import time
+import select as se
 from numpy import *
+import traceback
+import sys, os
+import rospy
+import math
 import tf
+
+msg = """
+Control Your TurtleBot3!
+---------------------------
+Moving around:
+        w
+   a    s    d
+        x
+
+w/x : increase/decrease linear velocity (Burger : ~ 0.22, Waffle and Waffle Pi : ~ 0.26)
+a/d : increase/decrease angular velocity (Burger : ~ 2.84, Waffle and Waffle Pi : ~ 1.82)
+
+space key, s : force stop
+
+CTRL-C to quit
+"""
+
 if os.name == 'nt':
   import msvcrt
 else:
   import tty, termios
 
-Agent_position=mat(zeros((4,2)))
-Agent_oumiga=mat(zeros((4,1)))
-Agent_C=mat(zeros((4,2)))
-Agent_theta=mat(zeros((4,3)))
-ad_mat=matrix([ [0.0,1.0,1.0,0.0],
-                [1.0,0.0,1.0,1.0],
-                [0.0,1.0,0.0,1.0],
-                [1.0,0.0,1.0,0.0]])
-Agent_ai=matrix([[0.06],
-                 [0.13], 
-                 [0.19],
-                 [0.24]])
-Agent_wi=0.1
-Mat_R=matrix([[0.0,1.0],
-             [-1.0,0.0]])
-Mat_fi=matrix([[0.0,0.0]])
-
-R0=matrix([[0.0,0.0]])
-
-BURGER_MAX_LIN_VEL = 0.22
-BURGER_MAX_ANG_VEL = 2.84
-WAFFLE_MAX_LIN_VEL = 0.26
-WAFFLE_MAX_ANG_VEL = 1.82
-LIN_VEL_STEP_SIZE = 0.01
-ANG_VEL_STEP_SIZE = 0.1
+from turtlebot.turtlebot_class import*    # import the turylrbot_class  
 
 
-def getKey():
+def getKey():                             # get keyboard value
     if os.name == 'nt':
       return msvcrt.getch()
 
@@ -82,172 +53,58 @@ def getKey():
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
     return key
 
-def vels(target_linear_vel, target_angular_vel):
-    return "currently:\tlinear vel %s\t angular vel %s " % (target_linear_vel,target_angular_vel)
 
- 
-def makeSimpleProfile(output, input, slop):
-    if input > output:
-        output = min( input, output + slop )
-    elif input < output:
-        output = max( input, output - slop )
-    else:
-        output = input
-    return output
 
-def constrain(input, low, high):
-    if input < low:
-      input = low
-    elif input > high:
-      input = high
-    else:
-      input = input
-    return input
-
-def checkLinearLimitVelocity(vel):
-    if turtlebot3_model == "burger":
-      vel = constrain(vel, -BURGER_MAX_LIN_VEL, BURGER_MAX_LIN_VEL)
-    elif turtlebot3_model == "waffle" or turtlebot3_model == "waffle_pi":
-      vel = constrain(vel, -WAFFLE_MAX_LIN_VEL, WAFFLE_MAX_LIN_VEL)
-    else:
-      vel = constrain(vel, -BURGER_MAX_LIN_VEL, BURGER_MAX_LIN_VEL)
-    return vel
-
-def checkAngularLimitVelocity(vel):
-    if turtlebot3_model == "burger":
-      vel = constrain(vel, -BURGER_MAX_ANG_VEL, BURGER_MAX_ANG_VEL)
-    elif turtlebot3_model == "waffle" or turtlebot3_model == "waffle_pi":
-      vel = constrain(vel, -WAFFLE_MAX_ANG_VEL, WAFFLE_MAX_ANG_VEL)
-    else:
-      vel = constrain(vel, -BURGER_MAX_ANG_VEL, BURGER_MAX_ANG_VEL)
-    return vel
-
-def callback(data):
-    Agent_Quaternionn=data.pose.pose.orientation
-    Agent_position[0,0]=data.pose.pose.position.x
-    Agent_position[0,1]=data.pose.pose.position.y
-    Agent_theta[0]=tf.transformations.euler_from_quaternion([Agent_Quaternionn.x,Agent_Quaternionn.y,Agent_Quaternionn.z,Agent_Quaternionn.w])
-    Agent_oumiga[0,0]=data.twist.twist.angular.z
-
-def callback1(data):
-    Agent_Quaternionn=data.pose.pose.orientation
-    Agent_position[1,0]=data.pose.pose.position.x
-    Agent_position[1,1]=data.pose.pose.position.y
-    Agent_theta[1]=tf.transformations.euler_from_quaternion([Agent_Quaternionn.x,Agent_Quaternionn.y,Agent_Quaternionn.z,Agent_Quaternionn.w])
-    Agent_oumiga[1,0]=data.twist.twist.angular.z
-def callback2(data):
-    Agent_Quaternionn=data.pose.pose.orientation
-    Agent_position[2,0]=data.pose.pose.position.x
-    Agent_position[2,1]=data.pose.pose.position.y
-    Agent_theta[2]=tf.transformations.euler_from_quaternion([Agent_Quaternionn.x,Agent_Quaternionn.y,Agent_Quaternionn.z,Agent_Quaternionn.w])
-    Agent_oumiga[2,0]=data.twist.twist.angular.z
-def callback3(data):
-    Agent_Quaternionn=data.pose.pose.orientation
-    Agent_position[3,0]=data.pose.pose.position.x
-    Agent_position[3,1]=data.pose.pose.position.y
-    Agent_theta[3]=tf.transformations.euler_from_quaternion([Agent_Quaternionn.x,Agent_Quaternionn.y,Agent_Quaternionn.z,Agent_Quaternionn.w])
-    Agent_oumiga[3,0]=data.twist.twist.angular.z
-
-def angular_vel_judge(angual_vel):
-    if(abs(angual_vel)>3.14):
-        return (-1*sign(angual_vel)*(6.28-abs(angual_vel)))    
-    else:
-        return angual_vel
-
-if __name__=="__main__":
+if __name__=="__main__":                 # main function
     if os.name != 'nt':
         settings = termios.tcgetattr(sys.stdin)
 
-    rospy.init_node('turtlebot3_telep')
-    pub = rospy.Publisher('/tb3_0/cmd_vel', Twist, queue_size=10)
-    pub1= rospy.Publisher('/tb3_1/cmd_vel', Twist, queue_size=10)
-    pub2= rospy.Publisher('/tb3_2/cmd_vel', Twist, queue_size=10)
-    pub3= rospy.Publisher('/tb3_3/cmd_vel', Twist, queue_size=10)
-    sub1= rospy.Subscriber('/tb3_0/odom', Odometry, callback,queue_size=1) 
-    sub2= rospy.Subscriber('/tb3_1/odom', Odometry, callback1,queue_size=1) 
-    sub3= rospy.Subscriber('/tb3_2/odom', Odometry, callback2,queue_size=1) 
-    sub4= rospy.Subscriber('/tb3_3/odom', Odometry, callback3,queue_size=1) 
-    ros_rate=rospy.Rate(50)
-    turtlebot3_model = rospy.get_param("model", "waffle_pi")
-    status = 0
+    rospy.init_node('turtlebot3_telep') #init a ros node
+    tb1=turtlebot(1)                    #init a instance of turtlebot class
+    ros_rate=rospy.Rate(50)             #set the cycle Time   
     target_linear_vel   = 0.0
-    target_angular_vel  = 0.0
-    target_xy_vel       = mat(zeros((4,2)))
-    target_theta       = mat(zeros((4,1)))
-    target_velo       = mat(zeros((4,1)))
-    theta_tar=0.0
-    control_linear_vel1 =0.0
-    control_angular_vel1=0.0
-    try:
-        while(1):
-            key = getKey()
+    target_angular_vel  = 0.0   
+    status = 0       
+    try:  
+        while(1):                     
+            key = getKey() #get the keyboard value
             if key == 'w' :
-                Agent_fomation=matrix([[-0.5,0.0],
-                                       [-1.0,0.0],
-                                        [0.0,0.0]])
+                target_linear_vel = checkLinearLimitVelocity(target_linear_vel + LIN_VEL_STEP_SIZE)
+                status = status + 1
+                print vels(target_linear_vel,target_angular_vel)
+            elif key == 'x' :
+                target_linear_vel = checkLinearLimitVelocity(target_linear_vel - LIN_VEL_STEP_SIZE)
+                status = status + 1
+                print vels(target_linear_vel,target_angular_vel)
+            elif key == 'a' :
+                target_angular_vel = checkAngularLimitVelocity(target_angular_vel + ANG_VEL_STEP_SIZE)
+                status = status + 1
+                print vels(target_linear_vel,target_angular_vel)
+            elif key == 'd' :
+                target_angular_vel = checkAngularLimitVelocity(target_angular_vel - ANG_VEL_STEP_SIZE)
+                status = status + 1
+                print vels(target_linear_vel,target_angular_vel)
+            elif key == ' ' or key == 's' :
+                target_linear_vel   = 0.0
+                control_linear_vel  = 0.0
+                target_angular_vel  = 0.0
+                control_angular_vel = 0.0
+                print vels(target_linear_vel, target_angular_vel)
             else:
                 if (key == '\x03'):
                     break
-            twist = Twist()
 
-            for i in range(4):
-                Mat_fi[0,0]=math.cos(Agent_theta[i,2])
-                Mat_fi[0,1]=math.sin(Agent_theta[i,2])
-                Agent_C[i]=Agent_position[i]+ (Agent_ai[i,0]/ Agent_wi)*dot(Mat_fi[0],Mat_R)
-            for i in range(4):
-                target_xy_vel[i]=[0.0,0.0]
-                target_theta[i,0]=0
-                Mat_fi[0,0]=math.cos(Agent_theta[i,2])
-                Mat_fi[0,1]=math.sin(Agent_theta[i,2])
-                for j in range(4):
-                    if(j != i):
-                        target_theta[i,0]=ad_mat[i,j]*1*(Agent_theta[j,2]-Agent_theta[i,2])+target_theta[i,0]
-                        target_xy_vel[i]=0.05*ad_mat[i,j]*(Agent_C[j]-Agent_C[i])+target_xy_vel[i]
-           
-                target_xy_vel[i]=Agent_ai[i,0]*Mat_fi+target_xy_vel[i]
-                target_theta[i,0]=Agent_wi
-                target_velo[i]=Mat_fi[0,0]*target_xy_vel[i,0]+Mat_fi[0,1]*target_xy_vel[i,1]
-   
-   
-            control_linear_vel1 = makeSimpleProfile(target_velo[0], target_linear_vel, (LIN_VEL_STEP_SIZE/2.0))
-            twist.linear.x = control_linear_vel1; twist.linear.y = 0.0; twist.linear.z = 0.0
-            control_angular_vel1 = makeSimpleProfile(control_angular_vel1, target_angular_vel, (ANG_VEL_STEP_SIZE/2.0))
-            twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = Agent_wi
-            pub.publish(twist)
- 
-            control_linear_vel1 = makeSimpleProfile(target_velo[1], target_linear_vel, (LIN_VEL_STEP_SIZE/2.0))
-            twist.linear.x = control_linear_vel1; twist.linear.y = 0.0; twist.linear.z = 0.0
-            control_angular_vel1 = makeSimpleProfile(control_angular_vel1, target_angular_vel, (ANG_VEL_STEP_SIZE/2.0))
-            twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = Agent_wi
-            pub1.publish(twist)
-    
-            control_linear_vel1 = makeSimpleProfile(target_velo[2], target_linear_vel, (LIN_VEL_STEP_SIZE/2.0))
-            twist.linear.x = control_linear_vel1 ; twist.linear.y = 0.0; twist.linear.z = 0.0
-            control_angular_vel1 = makeSimpleProfile(control_angular_vel1, target_angular_vel, (ANG_VEL_STEP_SIZE/2.0))
-            twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = Agent_wi
-            pub2.publish(twist)
-
-            control_linear_vel1 = makeSimpleProfile(target_velo[3], target_linear_vel, (LIN_VEL_STEP_SIZE/2.0))
-            twist.linear.x = control_linear_vel1 ; twist.linear.y = 0.0; twist.linear.z = 0.0
-            control_angular_vel1 = makeSimpleProfile(control_angular_vel1, target_angular_vel, (ANG_VEL_STEP_SIZE/2.0))
-            twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = Agent_wi
-            pub3.publish(twist)
-
-
-
-            ros_rate.sleep()
+            if status == 20 :
+                print msg
+                status = 0
+            tb1.turtlebot_control(target_linear_vel, target_angular_vel)    #set the linear and angle velocity
 
     except Exception as e:
         print(e)
         
 
     finally:
-        twist = Twist()
-        twist.linear.x = 0.0; twist.linear.y = 0.0; twist.linear.z = 0.0
-        twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = 0.0
-        pub.publish(twist)
-        pub1.publish(twist)
-        pub2.publish(twist)
+        tb1.turtlebot_control(0,0)
 
 
     if os.name != 'nt':
