@@ -207,7 +207,8 @@ if __name__=="__main__":
                 target_xy_vel[i]=Agent_ai[i,0]*Mat_fi+target_xy_vel[i]
                 target_theta[i,0]=Agent_wi
                 target_velo[i]=Mat_fi[0,0]*target_xy_vel[i,0]+Mat_fi[0,1]*target_xy_vel[i,1]
-            print(target_theta[0,0])
+   
+   
             control_linear_vel1 = makeSimpleProfile(target_velo[0], target_linear_vel, (LIN_VEL_STEP_SIZE/2.0))
             twist.linear.x = control_linear_vel1; twist.linear.y = 0.0; twist.linear.z = 0.0
             control_angular_vel1 = makeSimpleProfile(control_angular_vel1, target_angular_vel, (ANG_VEL_STEP_SIZE/2.0))
