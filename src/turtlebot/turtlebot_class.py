@@ -93,4 +93,4 @@ def cal_Laplace(Adj_mat):
         for j in range(0,row):
             if(i != j):
                 Lap_mat[i,i]+=Adj_mat[i,j]
-    return Lap_mat
+    return -Lap_mat

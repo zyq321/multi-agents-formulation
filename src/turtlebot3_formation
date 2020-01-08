@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+
+# Copyright (c) 2020, zyq_hit, Inc.
+# All rights reserved.
+# This is a simple example for formation
+
+from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
+import select as se
+from numpy import *
+import traceback
+import sys, os
+import rospy
+import math
+import tf
+
+if os.name == 'nt':
+  import msvcrt
+else:
+  import tty, termios
+
+from turtlebot.turtlebot_class import*    # import the turylrbot_class  
+
+
+ad_mat=matrix([ [0.0,1.0,1.0,0.0],      # Adjacent Matrix
+                [1.0,0.0,1.0,0.0],            
+                [1.0,0.0,0.0,1.0],
+                [1.0,0.0,1.0,0.0]])     
+                
+Agent_fomation=matrix([[-1,1],     # fomation Matrix
+                        [1,1],
+                        [-1,-1],
+                        [1,-1]]) 
+
+Agent_postion=zeros((4,2))
+contorl_mat=zeros((4,2))
+
+
+
+msg = """
+this is a python script of 4 turtlebot3 formation
+the for turtlebot3 will become a rectangle from the origin position
+"""
+
+
+
+def control_output(x,y,theta,iden=2):
+    if(iden==1):
+        linear_c_vel=0.2*math.sqrt(math.pow(x, 2)+math.pow(y+0.1, 2))
+    else:
+        linear_c_vel=(math.cos(theta)*x+math.sin(theta)*y)
+    angle_c_vel =6.66*(-1*math.sin(theta)*x+math.cos(theta)*y)
+    return linear_c_vel,angle_c_vel
+
+
+def getKey():                             # get keyboard value
+    if os.name == 'nt':
+      return msvcrt.getch()
+
+    tty.setraw(sys.stdin.fileno())
+    rlist, _, _ = se.select([sys.stdin], [], [], 0.1)
+    if rlist:
+        key = sys.stdin.read(1)
+    else:
+        key = ''
+
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+    return key
+
+
+
+if __name__=="__main__":                 # main function
+    if os.name != 'nt':
+        settings = termios.tcgetattr(sys.stdin)
+    rospy.init_node('turtlebot3_telep') #init a ros node
+    target_linear_vel   = 0.0
+    target_angular_vel  = 0.0   
+    agent=[]
+    for i in range(0,4):
+        tb=turtlebot(i)                    #init a instance of turtlebot class                 
+        agent.append(tb)
+    ros_rate=rospy.Rate(50)             #set the cycle Time   
+
+    Laplace_mat=cal_Laplace(ad_mat)
+    print( Laplace_mat)
+    try:  
+        while(1):                     
+            key = getKey() #get the keyboard value when input is ctrl+c then exit 
+            if (key == '\x03'):
+                    break
+            for i in range(0,4):        
+                Agent_postion[i]=agent[i].position.reshape(1,2)
+            control_mat=dot(Laplace_mat,(Agent_postion-Agent_fomation))
+            for i in range(0,4):        
+                v,w=control_output(control_mat[i,0],control_mat[i,1],agent[i].angle,iden=2)
+                agent[i].turtlebot_control(v,w)
+    
+        
+    except Exception as e:
+        print(e)
+        
+
+    finally:
+        for i in range(0,4):
+            agent[i].turtlebot_control(0,0)
+
+
+    if os.name != 'nt':
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
