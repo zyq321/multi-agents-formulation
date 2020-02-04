@@ -13,6 +13,11 @@ if os.name == 'nt':
   import msvcrt
 else:
   import tty, termios
+from cv2 import *
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+
   
 
 BURGER_MAX_LIN_VEL = 0.22
@@ -21,6 +26,8 @@ WAFFLE_MAX_LIN_VEL = 0.26
 WAFFLE_MAX_ANG_VEL = 1.82
 LIN_VEL_STEP_SIZE = 0.01
 ANG_VEL_STEP_SIZE = 0.1
+height=1080
+width=1920
 turtlebot3_model="waffle"
 
 class turtlebot:
@@ -31,7 +38,18 @@ class turtlebot:
         self.No=agent_no
         self.pub = rospy.Publisher('/tb3_'+str(self.No)+'/cmd_vel', Twist, queue_size=10)
         self.sub=  rospy.Subscriber('/tb3_'+str(self.No)+'/odom', Odometry, self.turtlebot_callback,queue_size=1) 
+        self.image_sub= rospy.Subscriber('/tb3_'+str(self.No)+'/camera/rgb/image_raw',Image,self.image_callback,queue_size=1)
+        self.depth_sub= rospy.Subscriber('/tb3_'+str(self.No)+'/camera/depth/image_raw',Image,self.depth_callback,queue_size=1)
+        self.bridge = CvBridge()
+        self.rgb_image=zeros((height,width,3), uint8)
+        self.depth_image=zeros((height,width,1), float32)
 
+    def image_callback(self,data):
+             self.rgb_image =self.bridge.imgmsg_to_cv2(data, "rgb8")
+    
+    def depth_callback(self,data):
+             self.depth_image =self.bridge.imgmsg_to_cv2(data, "32FC1")
+   
     def turtlebot_callback(self,data):
             Agent_Quaternionn=data.pose.pose.orientation
             self.position[0,0]=data.pose.pose.position.x

@@ -13,10 +13,7 @@ import sys, os
 import rospy
 import math
 import tf
-import cv2 
-from std_msgs.msg import String
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge, CvBridgeError
+import cv2
 
 if os.name == 'nt':
   import msvcrt
@@ -28,7 +25,7 @@ from turtlebot.turtlebot_class import*    # import the turylrbot_class
 
 ad_mat=matrix([ [0.0,1.0,1.0,0.0],      # Adjacent Matrix
                 [1.0,0.0,1.0,0.0],            
-                [1.0,0.0,0.0,1.0],
+                [1.0,1.0,0.0,1.0],
                 [1.0,0.0,1.0,0.0]])     
                 
 Agent_fomation=matrix([[-1,1],     # fomation Matrix
@@ -79,8 +76,9 @@ if __name__=="__main__":                 # main function
     rospy.init_node('turtlebot3_telep') #init a ros node
     target_linear_vel   = 0.0
     target_angular_vel  = 0.0   
+    Num=3
     agent=[]
-    for i in range(0,4):
+    for i in range(0,Num):
         tb=turtlebot(i)                    #init a instance of turtlebot class                 
         agent.append(tb)
     ros_rate=rospy.Rate(50)             #set the cycle Time   
@@ -88,14 +86,17 @@ if __name__=="__main__":                 # main function
     Laplace_mat=cal_Laplace(ad_mat)
     print( Laplace_mat)
     try:  
-        while(1):                     
+        while(1):       
+            imshow("1234",agent[0].depth_image/4000*255)      
+            imshow("123",agent[0].rgb_image)     
+            waitKey(1)          
             key = getKey() #get the keyboard value when input is ctrl+c then exit 
             if (key == '\x03'):
                     break
-            for i in range(0,4):        
+            for i in range(0,Num):        
                 Agent_postion[i]=agent[i].position.reshape(1,2)
             control_mat=dot(Laplace_mat,(Agent_postion-Agent_fomation))
-            for i in range(0,4):        
+            for i in range(0,Num):        
                 v,w=control_output(control_mat[i,0],control_mat[i,1],agent[i].angle,iden=2)
                 agent[i].turtlebot_control(v,w)
     
@@ -105,7 +106,7 @@ if __name__=="__main__":                 # main function
         
 
     finally:
-        for i in range(0,4):
+        for i in range(0,Num):
             agent[i].turtlebot_control(0,0)
 
 
