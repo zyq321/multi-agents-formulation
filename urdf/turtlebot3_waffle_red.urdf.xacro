@@ -7,6 +7,11 @@
   <xacro:property name="r200_cam_rgb_py" value="0.018"/>
   <xacro:property name="r200_cam_rgb_pz" value="0.013"/>
   <xacro:property name="r200_cam_depth_offset" value="0.01"/>
+
+
+
+
+
   
   <link name="base_footprint"/>
 
@@ -191,7 +196,7 @@
   </link>
 
 <gazebo reference="ball">
-     <material>Gazebo/Red</material>
+     <material>Gazebo/Blue</material>
      <turnGravityOff>false</turnGravityOff>
  </gazebo>
 
@@ -202,10 +207,9 @@
           <cylinder length="0.1" radius="0.02">
       </cylinder>
       </geometry>
-         <material name="Red">
-                <color rgba="0.8 0.0 0.0 1.0"/>
-          </material>
-        
+         <material name="m_Blue">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
     </visual>
 
     <collision>
@@ -224,12 +228,208 @@
     </inertial>
   </link>
 
+
   <joint name="base_scan_ball" type="continuous">
     <parent link="base_scan"/>
     <child link="ball"/>
     <origin xyz="0.0 0.0 0.06" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
   </joint>
+
+
+
+<gazebo reference="rec">
+     <material>Gazebo/Dark</material>
+     <turnGravityOff>false</turnGravityOff>
+ </gazebo>
+
+  <link name="rec">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <mesh filename="package://multi-agents-formulation/len.stl" scale="0.05 0.06 0.05"/>
+      </geometry>
+         <material name="dark"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0.015 0 -0.0065" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0315" radius="0.055"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+
+  <joint name="base_link_rec" type="fixed">
+    <parent link="base_link"/>
+    <child link="rec"/>
+    <origin xyz="-0.19 0.000 0.05" rpy="-1.57 0 1.57"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+
+<gazebo reference="feature1">
+     <material>Gazebo/Red</material>
+     <turnGravityOff>false</turnGravityOff>
+ </gazebo>
+
+  <link name="feature1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <mesh filename="package://multi-agents-formulation/fearure.stl" scale="0.025 0.025 0.025"/>
+      </geometry>
+           
+ <material name="m_Red">
+    <color rgba="0.0 0.0 0.8 1.0"/>
+  </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0.00 0 -0.000" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.00" radius="0.00"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+
+  <joint name="rec_link_f1" type="fixed">
+    <parent link="rec"/>
+    <child link="feature1"/>
+    <origin xyz="0.05 0.025 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+<gazebo reference="feature2">
+     <material>Gazebo/Red</material>
+     <turnGravityOff>false</turnGravityOff>
+ </gazebo>
+
+  <link name="feature2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <mesh filename="package://multi-agents-formulation/fearure.stl" scale="0.025 0.025 0.025"/>
+      </geometry>
+           <material name="Red"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0.00 0 -0.000" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.00" radius="0.00"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+
+  <joint name="rec_link_f2" type="fixed">
+    <parent link="rec"/>
+    <child link="feature2"/>
+    <origin xyz="0.05 -0.040 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+<gazebo reference="feature3">
+     <material>Gazebo/Red</material>
+     <turnGravityOff>false</turnGravityOff>
+ </gazebo>
+
+  <link name="feature3">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <mesh filename="package://multi-agents-formulation/fearure.stl" scale="0.025 0.025 0.025"/>
+      </geometry>
+           <material name="Red"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0.00 0 -0.000" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.00" radius="0.00"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+
+  <joint name="rec_link_f3" type="fixed">
+    <parent link="rec"/>
+    <child link="feature3"/>
+    <origin xyz="-0.05 -0.040 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+
+
+<gazebo reference="feature4">
+     <material>Gazebo/Red</material>
+     <turnGravityOff>false</turnGravityOff>
+ </gazebo>
+
+  <link name="feature4">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <mesh filename="package://multi-agents-formulation/fearure.stl" scale="0.025 0.025 0.025"/>
+      </geometry>
+           <material name="Red"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0.00 0 -0.000" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.00" radius="0.00"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+
+  <joint name="rec_link_f4" type="fixed">
+    <parent link="rec"/>
+    <child link="feature4"/>
+    <origin xyz="-0.05 0.025 0.02" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+
 
 
   <joint name="camera_joint" type="fixed">

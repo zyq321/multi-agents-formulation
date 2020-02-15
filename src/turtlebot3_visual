@@ -14,6 +14,7 @@ import rospy
 import math
 import tf
 import cv2
+import datetime
 
 if os.name == 'nt':
   import msvcrt
@@ -35,15 +36,52 @@ Agent_fomation=matrix([[-1,1],     # fomation Matrix
 
 Agent_postion=zeros((4,2))
 contorl_mat=zeros((4,2))
-
-
+camera_param=[1.0,540.5,960.5,1206.89,1206.89]
+camera_matrix=array([ [1206.8897, 0.0,        960.5],      # Adjacent Matrix
+                       [0.0,       1206.8897,  540.5],            
+                       [0.0,       0.0,         1.0]]) 
 
 msg = """
 this is a python script of 4 turtlebot3 formation
 the for turtlebot3 will become a rectangle from the origin position
 """
 
+def getxyz(u,v,depth):
+    camera_factor=camera_param[0]
+    cx=camera_param[2]
+    cy=camera_param[1]
+    fx=camera_param[3]
+    fy=camera_param[4]
+    z=depth/ camera_factor
+    x=(u - cx) * z / fx
+    y=(v - cy) * z / fy
+    return x,y,z
+    
+    
+def cameraPoseFromHomography(H):
+    H1 = H[:, 0]
+    H2 = H[:, 1]
+    H3 = cross(H1, H2)
+    norm1 = linalg.norm(H1)
+    norm2 = linalg.norm(H2)
+    tnorm = (norm1 + norm2) / 2.0
+    T = H[:, 2] / tnorm
+    return cv2.Rodrigues(mat([H1, H2, H3]))
 
+
+def calcRTfromHomo(H):
+    H1 = H[:, 0]
+    H2 = H[:, 1]
+    H3 = H[:, 2]
+    norm1 = linalg.norm(H1)
+    R1=H1/norm1
+    R2=H2/norm1
+    R3=cross(R1,R2)
+    R=mat([R1, R2, R3]).T
+    U,W,V=linalg.svd(R)
+    R=dot(U, V)
+
+    return cv2.Rodrigues(R)
 
 def control_output(x,y,theta,iden=2):
     if(iden==1):
@@ -84,21 +122,117 @@ if __name__=="__main__":                 # main function
     ros_rate=rospy.Rate(50)             #set the cycle Time   
 
     Laplace_mat=cal_Laplace(ad_mat)
-    print( Laplace_mat)
+    lower_red = array([100, 43,46])
+    upper_red = array([180, 255, 255])
+    lower_blue = array([0, 43,46])
+    upper_blue = array([50, 255, 255])
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    arget_center=[(961.6495971679688, 671.3650512695312), 
+                  (795.37548828125, 671.2860107421875), 
+                  (961.6415405273438, 563.2236328125), 
+                  (795.3990478515625, 563.2208862304688)]
+    distCoeffD=array([0.0,0.0,0.0,0.0,0.0])
+
     try:  
-        while(1):       
-            imshow("1234",agent[0].depth_image/4000*255)      
-            imshow("123",agent[0].rgb_image)     
-            waitKey(1)          
+        while(1):  
+            feature_center=[]  
+            ellipse_center=[]
+            ellipse_y=[]
+            ellipse_x=[]   
+            No_list=[]   
+            target_position=[]  
+            Point3D=[]
+
+            hsv_image=cv2.cvtColor(agent[2].rgb_image,cv2.COLOR_RGB2HSV)
+            mask =cv2.inRange(hsv_image, lower_red, upper_red)
+            mask_target=cv2.inRange(hsv_image, lower_blue, upper_blue)
+            img1,contours,hierarchy = cv2.findContours(mask , cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+            img2,target,hierarchy = cv2.findContours(mask_target , cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+
+            # params = cv2.SimpleBlobDetector_Params()
+            # params.filterByCircularity =False
+            # params.minCircularity = 0.1
+            # params.blobColor=255
+            # detector = cv2.SimpleBlobDetector_create(params)
+            if len(target)==1:
+                for cnt in target:
+                    (x, y, w, h) = cv2.boundingRect(cnt)
+                    target_position.append(getxyz(y+h/2,x+w/2,agent[2].depth_image[y+h/2,x+w/2]))
+                    print(getxyz(y+h/2,x+w/2,agent[2].depth_image[y+h/2,x+w/2]))
+                    waitKey(1)
+
+            i=0
+            # print(target_position)
+            if len(contours)==4:
+                for cnt in contours:
+                    (x, y, w, h) = cv2.boundingRect(cnt)
+                    ellipse_x.append(x)
+                    ellipse_y.append(y)
+                x_y_sum=ellipse_x+ellipse_y
+                max_no=argmax(x_y_sum)
+                if(max_no==0):
+                    No_list.append(0)
+                    No_list.append(1)
+                else:
+                    No_list.append(1)
+                    No_list.append(0)
+                min_no=argmin(x_y_sum)
+                if(min_no==3):
+                    No_list.append(3)
+                    No_list.append(2)
+                else:
+                    No_list.append(2)
+                    No_list.append(3)
+            
+            
+                for cnt in contours:
+                    i=i+1
+                    (x, y, w, h) = cv2.boundingRect(cnt)
+                    if w > 10 and h > 10:
+                        f_ellipse = cv2.fitEllipse(cnt)
+                        cv2.ellipse(agent[2].rgb_image, f_ellipse, (0,255,0), 1)
+                        ellipse_center.append(f_ellipse[0])
+                        cv2.putText(agent[2].rgb_image, str(No_list[i-1]), (int(f_ellipse[0][0]), int(f_ellipse[0][1])), font, 1.0, (0, 0, 255), 2)
+               
+               
+                for i in range(0,4):
+                    point2d=ellipse_center[No_list[i]]
+                    depth=agent[2].depth_image[int(point2d[1]),int(point2d[0])]
+                    feature_center.append(point2d)
+                    Point3D.append(getxyz(point2d[0],point2d[1],depth))
+                # print(Point3D)
+                H, mask = cv2.findHomography(array(arget_center), array(feature_center), 0,5.0)
+                R=calcRTfromHomo(H)
+
+                success,rvec,tvec=cv2.solvePnP(array(Point3D),array(arget_center),camera_matrix,distCoeffD)
+                # x=math.atan2(R[1,0],R[0,0])
+
+                print(rvec)
+               
+            # time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            # print(time)
+
+            # for i in range(mask.shape[0]):
+            #     for j in range(mask.shape[1]):
+            #         if mask[i,j]>200 :
+            #             n=n+1
+            #             sum_x+=i
+            #             sum_y+=j
+
+            # if(n!=0):
+            #     print(getxyz(sum_x/n,sum_y/n,agent[2].depth_image[sum_x/n,sum_y/n]))
+            imshow("123", agent[2].rgb_image)
+            waitKey(10)          
             key = getKey() #get the keyboard value when input is ctrl+c then exit 
             if (key == '\x03'):
                     break
-            for i in range(0,Num):        
-                Agent_postion[i]=agent[i].position.reshape(1,2)
-            control_mat=dot(Laplace_mat,(Agent_postion-Agent_fomation))
-            for i in range(0,Num):        
-                v,w=control_output(control_mat[i,0],control_mat[i,1],agent[i].angle,iden=2)
-                agent[i].turtlebot_control(v,w)
+            # for i in range(0,Num):        
+            #     Agent_postion[i]=agent[i].position.reshape(1,2)
+            # control_mat=dot(Laplace_mat,(Agent_postion-Agent_fomation))
+            # for i in range(0,Num):        
+            #     v,w=control_output(control_mat[i,0],control_mat[i,1],agent[i].angle,iden=2)
+            #     agent[i].turtlebot_control(v,w)
     
         
     except Exception as e:

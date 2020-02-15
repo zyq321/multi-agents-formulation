@@ -204,7 +204,7 @@
       </cylinder>
       </geometry>
          <material name="Yellow">
-                <color rgba="1.0 0.4 0.0 1.0"/>
+                <color rgba="1.0 1.0 0.0 1.0"/>
           </material>
         
     </visual>

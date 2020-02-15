@@ -45,7 +45,7 @@ class turtlebot:
         self.depth_image=zeros((height,width,1), float32)
 
     def image_callback(self,data):
-             self.rgb_image =self.bridge.imgmsg_to_cv2(data, "rgb8")
+             self.rgb_image=cvtColor(self.bridge.imgmsg_to_cv2(data, "rgb8"),COLOR_BGR2RGB) 
     
     def depth_callback(self,data):
              self.depth_image =self.bridge.imgmsg_to_cv2(data, "32FC1")
