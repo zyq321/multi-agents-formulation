@@ -120,7 +120,6 @@ if __name__=="__main__":                 # main function
         tb=turtlebot(i)                    #init a instance of turtlebot class                 
         agent.append(tb)
     ros_rate=rospy.Rate(50)             #set the cycle Time   
-
     Laplace_mat=cal_Laplace(ad_mat)
     lower_red = array([100, 43,46])
     upper_red = array([180, 255, 255])
@@ -132,9 +131,31 @@ if __name__=="__main__":                 # main function
                   (961.6415405273438, 563.2236328125), 
                   (795.3990478515625, 563.2208862304688)]
     distCoeffD=array([0.0,0.0,0.0,0.0,0.0])
-
+    ud=896
+    vd=429
+    zi=0.07
+    au=camera_matrix[0,0]
+    av=camera_matrix[1,1]
+    u0=camera_matrix[0,2]
+    v0=camera_matrix[1,2]
+    Velo_ij=0
+    u_ij=0
+    v_ij=0
+    delta_uv=matrix([ [0.0],      # pixel error
+                      [0.0]])  
+    image_uv=matrix([ [0.0],      # uv
+                      [0.0],
+                      [1.0]]) 
+    gij=matrix([ [0.0],   
+                 [0.0]]) 
+    M_ij=matrix([ [0.0],   
+                 [0.0],
+                 [1.0]]) 
+    Gij=matrix([ [0.0,0.0],   
+                  [0.0,0.0]]) 
     try:  
         while(1):  
+            agent[0].turtlebot_control(0.05,0.01)
             feature_center=[]  
             ellipse_center=[]
             ellipse_y=[]
@@ -142,27 +163,30 @@ if __name__=="__main__":                 # main function
             No_list=[]   
             target_position=[]  
             Point3D=[]
+            i=0
+
 
             hsv_image=cv2.cvtColor(agent[2].rgb_image,cv2.COLOR_RGB2HSV)
             mask =cv2.inRange(hsv_image, lower_red, upper_red)
             mask_target=cv2.inRange(hsv_image, lower_blue, upper_blue)
             img1,contours,hierarchy = cv2.findContours(mask , cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             img2,target,hierarchy = cv2.findContours(mask_target , cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
+          
 
             # params = cv2.SimpleBlobDetector_Params()
             # params.filterByCircularity =False
             # params.minCircularity = 0.1
             # params.blobColor=255
             # detector = cv2.SimpleBlobDetector_create(params)
+
+            
             if len(target)==1:
                 for cnt in target:
                     (x, y, w, h) = cv2.boundingRect(cnt)
-                    target_position.append(getxyz(y+h/2,x+w/2,agent[2].depth_image[y+h/2,x+w/2]))
-                    print(getxyz(y+h/2,x+w/2,agent[2].depth_image[y+h/2,x+w/2]))
-                    waitKey(1)
+                    target_position.append(getxyz(x+w/2,y+h/2,agent[2].depth_image[y+h/2,x+w/2]))
+                    u_ij=x+w/2
+                    v_ij=y+h/2
 
-            i=0
             # print(target_position)
             if len(contours)==4:
                 for cnt in contours:
@@ -201,15 +225,38 @@ if __name__=="__main__":                 # main function
                     depth=agent[2].depth_image[int(point2d[1]),int(point2d[0])]
                     feature_center.append(point2d)
                     Point3D.append(getxyz(point2d[0],point2d[1],depth))
+                
                 # print(Point3D)
                 H, mask = cv2.findHomography(array(arget_center), array(feature_center), 0,5.0)
                 R=calcRTfromHomo(H)
-
                 success,rvec,tvec=cv2.solvePnP(array(Point3D),array(arget_center),camera_matrix,distCoeffD)
+                cv2.putText(agent[2].rgb_image, str("x:")+str( target_position[0][2]), (int(feature_center[0][0])+100, int(feature_center[0][1])), font, 1.0, (0, 0, 255), 2)
+                cv2.putText(agent[2].rgb_image, str("y:")+str( target_position[0][1]), (int(feature_center[0][0])+100, int(feature_center[0][1])+30), font, 1.0, (0, 0, 255), 2)
+                cv2.putText(agent[2].rgb_image, str("z:")+str( target_position[0][0]), (int(feature_center[0][0])+100, int(feature_center[0][1])+60), font, 1.0, (0, 0, 255), 2)
+                cv2.putText(agent[2].rgb_image, str("theta:")+str( rvec[1][0]), (int(feature_center[0][0])+100, int(feature_center[0][1])+90), font, 1.0, (0, 0, 255), 2)
+              
                 # x=math.atan2(R[1,0],R[0,0])
 
-                print(rvec)
-               
+                theta_ij=rvec[1]
+                image_uv[0,0]=u_ij
+                image_uv[1,0]=v_ij
+                Mij=dot(linalg.inv(camera_matrix),image_uv)
+                qij=Mij[1,0]
+                pij=Mij[0,0]
+                gij[0,0]=(au*math.sin(theta_ij)-(u0-u_ij)*math.cos(theta_ij))*qij
+                gij[1,0]=-(v0-v_ij)*math.cos(theta_ij)*qij
+                delta_uv[0,0]=u_ij-ud
+                delta_uv[1,0]=v_ij-vd
+                Velo_ij=Velo_ij+0.02*(-0.0001*Velo_ij+1/zi*0.00002*delta_uv.T*gij)
+                Gij[0,0]=1/zi*(u0-u_ij)*qij
+                Gij[0,1]=au-(u0-u_ij)*pij
+                Gij[1,0]=1/zi*(v0-v_ij)*qij
+                Gij[1,1]=-(u0-u_ij)*pij
+                control=Gij.I*(-0.1*delta_uv-1/zi*gij* Velo_ij)
+                agent[2].turtlebot_control(control[0,0],control[1,0])
+                cv2.putText(agent[2].rgb_image, str("v:")+str( Velo_ij[0,0]), (int(feature_center[0][0])+100, int(feature_center[0][1])+120), font, 1.0, (0, 0, 255), 2)
+                print(Velo_ij)
+
             # time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             # print(time)
 
@@ -223,25 +270,22 @@ if __name__=="__main__":                 # main function
             # if(n!=0):
             #     print(getxyz(sum_x/n,sum_y/n,agent[2].depth_image[sum_x/n,sum_y/n]))
             imshow("123", agent[2].rgb_image)
-            waitKey(10)          
+            waitKey(1)          
             key = getKey() #get the keyboard value when input is ctrl+c then exit 
             if (key == '\x03'):
-                    break
-            # for i in range(0,Num):        
-            #     Agent_postion[i]=agent[i].position.reshape(1,2)
-            # control_mat=dot(Laplace_mat,(Agent_postion-Agent_fomation))
-            # for i in range(0,Num):        
-            #     v,w=control_output(control_mat[i,0],control_mat[i,1],agent[i].angle,iden=2)
-            #     agent[i].turtlebot_control(v,w)
+                for i in range(0,Num):
+                    agent[i].turtlebot_control(0,0)
+                break
+            ros_rate.sleep()
     
         
     except Exception as e:
         print(e)
         
 
-    finally:
-        for i in range(0,Num):
-            agent[i].turtlebot_control(0,0)
+    # finally:
+    #     # for i in range(0,Num):
+    #     #     agent[i].turtlebot_control(0,0)
 
 
     if os.name != 'nt':

@@ -60,7 +60,7 @@ if __name__=="__main__":                 # main function
         settings = termios.tcgetattr(sys.stdin)
 
     rospy.init_node('turtlebot3_telep') #init a ros node
-    tb1=turtlebot(1)                    #init a instance of turtlebot class
+    tb1=turtlebot(0)                    #init a instance of turtlebot class
     ros_rate=rospy.Rate(50)             #set the cycle Time   
     target_linear_vel   = 0.0
     target_angular_vel  = 0.0   
@@ -97,7 +97,7 @@ if __name__=="__main__":                 # main function
             if status == 20 :
                 print msg
                 status = 0
-            tb1.turtlebot_control(target_linear_vel, target_angular_vel)    #set the linear and angle velocity
+            tb1.turtlebot_control(0.01, target_angular_vel)    #set the linear and angle velocity
 
     except Exception as e:
         print(e)
