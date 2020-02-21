@@ -64,7 +64,7 @@ class turtlebot:
             twist.angular.x = 0.0; twist.angular.y = 0.0; twist.angular.z = control_angular_vel
             self.pub.publish(twist)
    
-    def angular_vel_judge(angual_vel):
+    def angular_vel_judge(self,angual_vel):
         if(abs(angual_vel)>3.14):
             return (-1*sign(angual_vel)*(6.28-abs(angual_vel)))    
         else:
