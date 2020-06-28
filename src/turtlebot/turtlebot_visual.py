@@ -17,6 +17,7 @@ camera_param=[1.0,540.5,960.5,1206.89,1206.89]
 camera_matrix=array([ [1206.8897, 0.0,        960.5],      # camera Matrix
                        [0.0,       1206.8897,  540.5],            
                        [0.0,       0.0,         1.0]]) 
+dist = array( [0.0, 0.0, 0.0, 0.0, 0.0] )
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 
@@ -66,6 +67,7 @@ def calcRTfromHomo(H):
     H2 = H[:, 1]
     H3 = H[:, 2]
     norm1 = linalg.norm(H1)
+    norm2 = linalg.norm(H2)
     R1=H1/norm1
     R2=H2/norm1
     R3=cross(R1,R2)
@@ -77,14 +79,15 @@ def calcRTfromHomo(H):
 
 def calcCenterfromColorRec(hsv_image,lowerb,upperb):
   mask =cv2.inRange(hsv_image, lowerb, upperb)
+  # cv2.imshow("123", mask)
+  # cv2.waitKey(1)
   result,contours,hierarchy = cv2.findContours(mask , cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
   if len(contours)==1:
     for cnt in contours:
       (x, y, w, h) = cv2.boundingRect(cnt)
       u=x+w/2
       v=y+h/2
-      # cv2.imshow("123", mask)
-      # cv2.waitKey(1)          
+           
   else:
      print("error in detect rectangle")
      u=0
@@ -118,7 +121,7 @@ def calcCenterfromEllipse(robot,hsv_image,lowerb,upperb):
   for i in range(0,4):
     point2d=ellipse_center[No_list[i]]
     depth=robot.depth_image[int(point2d[1]),int(point2d[0])]
-    feature_center.append(point2d)
+    feature_center.append((point2d))
     Point3D.append(getxyz(point2d[0],point2d[1],depth,camera_param))
     cv2.putText(robot.rgb_image, str(No_list[i]), (int(ellipse_center[i][0]), int(ellipse_center[i][1])), font, 1.0, (0, 0, 255), 2)
   return 1,feature_center,Point3D

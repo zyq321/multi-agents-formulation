@@ -1,5 +1,5 @@
 <launch>
-  <arg name="first_model" default="waffle_red" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="first_model" default="waffle_red1" doc="model type [burger, waffle, waffle_pi]"/>
   <arg name="second_model" default="waffle_yellow" doc="model type [burger, waffle, waffle_pi]"/>
   <arg name="third_model" default="waffle1" doc="model type [burger, waffle, waffle_pi]"/>
 
@@ -10,7 +10,7 @@
   <arg name="first_tb3_x_pos" default=" 0.0"/>
   <arg name="first_tb3_y_pos" default=" 0.0"/>
   <arg name="first_tb3_z_pos" default=" 0.0"/>
-  <arg name="first_tb3_yaw"   default=" 0.0"/>
+  <arg name="first_tb3_yaw"   default=" -0.0"/>
 
   <arg name="second_tb3_x_pos" default=" 0.5"/>
   <arg name="second_tb3_y_pos" default=" -0.5"/>

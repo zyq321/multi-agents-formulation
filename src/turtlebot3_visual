@@ -23,6 +23,7 @@ else:
 
 from turtlebot.turtlebot_class import*    # import the turylrbot_class  
 from turtlebot.turtlebot_visual import*
+from global_camera import*
 
 
 
@@ -55,12 +56,20 @@ if __name__=="__main__":                 # main function
     lower_red = array([100, 43,46])
     upper_red = array([180, 255, 255])
     lower_blue = array([0, 43,46])
-    upper_blue = array([50, 255, 255])
+    upper_blue = array([10, 255, 255])
     arget_center=[(961.6495971679688, 671.3650512695312), 
                   (795.37548828125, 671.2860107421875), 
                   (961.6415405273438, 563.2236328125), 
                   (795.3990478515625, 563.2208862304688)]
-    
+    arget_center1=[(961.6495971679688, 671.3650512695312), 
+                  (795.37548828125, 671.2860107421875), 
+                  (961.6415405273438, 563.2236328125), 
+                  (795.3990478515625, 563.2208862304688)]
+    target_3D=[(-0.0012696612558929881, 0.078636843961023314, 0.7255406379699707), 
+               (-0.1012433574308249, 0.078641446846077712, 0.72562813758850098),
+               (-0.0012749995749375953, 0.013664101384881349, 0.72559261322021484), 
+               (-0.10124235194523283, 0.013651473124956855, 0.72568011283874512)]
+
 
     ud=896
     vd=429
@@ -84,11 +93,15 @@ if __name__=="__main__":                 # main function
                  [1.0]]) 
     Gij=matrix([ [0.0,0.0],   
                   [0.0,0.0]]) 
-
-
+    sum_x=0
+    sum_y=0
+    for i in range(0,4):
+        sum_x=sum_x+arget_center[i][0]
+        sum_y=sum_y+arget_center[i][1]
+    arget_center1.append((sum_x/4,sum_y/4))
     try:  
         while(1):  
-            agent[0].turtlebot_control(0.1,-0.01)
+            agent[0].turtlebot_control(0.1,-0.02)
             feature_center=[]  
             ellipse_center=[]
             ellipse_y=[]
@@ -111,10 +124,9 @@ if __name__=="__main__":                 # main function
                 
                 H, mask = cv2.findHomography(array(arget_center), array(feature_center), 0,5.0)
                 R=calcRTfromHomo(H)
-                success,rvec,tvec=cv2.solvePnP(array(Point3D),array(arget_center),camera_matrix,distCoeffD)
-
-                theta_ij=rvec[1][0]
-                theta_ij=agent[2].angular_vel_judge(theta_ij)
+                # success,rvec,tvec=cv2.solvePnP(array(Point3D),array(arget_center),camera_matrix,distCoeffD)
+                success,rvec1,tvec1=cv2.solvePnP(array(target_3D),array(feature_center),camera_matrix,distCoeffD)
+                theta_ij=agent[2].angular_vel_judge(-rvec1[1][0])
                 image_uv[0,0]=u_ij
                 image_uv[1,0]=v_ij
                 Mij=dot(linalg.inv(camera_matrix),image_uv)
@@ -137,13 +149,24 @@ if __name__=="__main__":                 # main function
                 cv2.putText(agent[2].rgb_image, str("x:")+str( target_position[0][2]), (int(feature_center[0][0])+100, int(feature_center[0][1])), font, 1.0, (0, 0, 255), 2)
                 cv2.putText(agent[2].rgb_image, str("y:")+str( target_position[0][1]), (int(feature_center[0][0])+100, int(feature_center[0][1])+30), font, 1.0, (0, 0, 255), 2)
                 cv2.putText(agent[2].rgb_image, str("z:")+str( target_position[0][0]), (int(feature_center[0][0])+100, int(feature_center[0][1])+60), font, 1.0, (0, 0, 255), 2)
-                cv2.putText(agent[2].rgb_image, str("theta:")+str( rvec[1][0]), (int(feature_center[0][0])+100, int(feature_center[0][1])+90), font, 1.0, (0, 0, 255), 2)
-                print(cameraPoseFromHomography(H))
-
+                cv2.putText(agent[2].rgb_image, str("theta:")+str( -rvec1[1][0]), (int(feature_center[0][0])+100, int(feature_center[0][1])+90), font, 1.0, (0, 0, 255), 2)
+                print(rvec1[1][0])
+                # sum_x=0
+                # sum_y=0
+                # for i in range(0,4):
+                #     sum_x=sum_x+feature_center[i][0]
+                #     sum_y=sum_y+feature_center[i][1]
+                # feature_center.append((sum_x/4,sum_y/4))
+                
+                # E=cv2.findEssentialMat(array(arget_center1), array(feature_center),camera_matrix)
+                # print(E)
+                # # print (recoverPose(E[0],array(arget_center1), array(feature_center),camera_matrix))
+                print("_____________________________________________--")
             # time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             # print(time)
-            # imshow("123", agent[2].rgb_image)
-            # waitKey(1)          
+               
+            imshow("1234", agent[2].rgb_image)
+            waitKey(1)          
             key = getKey() #get the keyboard value when input is ctrl+c then exit 
             if (key == '\x03'):
                 for i in range(0,Num):
