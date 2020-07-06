@@ -1,5 +1,3 @@
-# multi-agents-formulation
-# 此工程主要实现多个智能体的编队
-# launch 打开仿真世界
-# turtlebot3_teleop_control 为控制turtlebot 的一个小demo
-# turtlebot3_formation 为一个简单的队形生成demo
+#在运行前请确保已安装ubuntu16.04和ros kinetic 并安装好turtlebot3的相关包
+#上述环境的安装可以参照https://www.ncnynl.com/archives/201707/1840.html
+#此文件主要实现多个移动机器人的协同控制，SRC
