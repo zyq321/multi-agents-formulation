@@ -6,7 +6,8 @@
 
 multi_turtlebot3.launch和turtlebot3_formation.py实现移动机器人的简单编队
 
-multi_turtlebot3_visual.launch和turtlebot3_visual.py实现基于视觉的编队
+multi_turtlebot3_visual.launch和turtlebot3_visual.py实现基于视觉的编队（基于Leader-following，还在开发中）具体算法可以参照
+Formation Control of Nonholonomic Mobile Robots Without Position and Velocity Measurements
 
 multi_turtlebot3_optimal.launch和实现多机器人的协同分布式kalman filter（DKF）
 
