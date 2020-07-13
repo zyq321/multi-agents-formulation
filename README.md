@@ -13,5 +13,14 @@ multi_turtlebot3_visual.launch和turtlebot3_visual.py实现基于视觉的编队
 Formation Control of Nonholonomic Mobile Robots Without Position and Velocity Measurements
 
 multi_turtlebot3_optimal.launch和实现多机器人的协同分布式kalman filter（DKF）
+效果如下
+观测值：
+![image](https://github.com/zyq321/multi-agents-formulation/tree/master/gif/measurement.gif)
+单个机器人Kalman Filter
+![image](https://github.com/zyq321/multi-agents-formulation/tree/master/gif/KF.gif)
+集群Distributed Kalman Filter
+![image](https://github.com/zyq321/multi-agents-formulation/tree/master/gif/DKF.gif)
+
+
 
 如有问题可联系493050589@qq.com
