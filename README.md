@@ -5,7 +5,8 @@
 此文件主要实现多个移动机器人的协同控制，SRC中包含了python源代码，launch中包含了启动gazebo仿真的launch文件，urdf中是模型的xroca文件
 
 multi_turtlebot3.launch和turtlebot3_formation.py实现移动机器人的简单编队
-
+效果如下
+![image](https://github.com/zyq321/multi-agents-formulation/gif/formation_res.gif)
 multi_turtlebot3_visual.launch和turtlebot3_visual.py实现基于视觉的编队（基于Leader-following，还在开发中）具体算法可以参照
 Formation Control of Nonholonomic Mobile Robots Without Position and Velocity Measurements
 
