@@ -1,5 +1,14 @@
-# multi-agents-formulation
-# 此工程主要实现多个智能体的编队
-# launch 打开仿真世界
-# turtlebot3_teleop_control 为控制turtlebot 的一个小demo
-# turtlebot3_formation 为一个简单的队形生成demo
+在运行前请确保已安装ubuntu16.04和ros kinetic 并安装好turtlebot3的相关包
+
+上述环境的安装可以参照https://www.ncnynl.com/archives/201707/1840.html
+
+此文件主要实现多个移动机器人的协同控制，SRC中包含了python源代码，launch中包含了启动gazebo仿真的launch文件，urdf中是模型的xroca文件
+
+multi_turtlebot3.launch和turtlebot3_formation.py实现移动机器人的简单编队
+
+multi_turtlebot3_visual.launch和turtlebot3_visual.py实现基于视觉的编队（基于Leader-following，还在开发中）具体算法可以参照
+Formation Control of Nonholonomic Mobile Robots Without Position and Velocity Measurements
+
+multi_turtlebot3_optimal.launch和实现多机器人的协同分布式kalman filter（DKF）
+
+如有问题可联系493050589@qq.com
