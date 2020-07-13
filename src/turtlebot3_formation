@@ -14,6 +14,7 @@ import rospy
 import math
 import tf
 import cv2 
+import time
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -26,15 +27,15 @@ else:
 from turtlebot.turtlebot_class import*    # import the turylrbot_class  
 
 
-ad_mat=matrix([ [0.0,1.0,1.0,0.0],      # Adjacent Matrix
+ad_mat=matrix([ [0.0,1.0,1.0,1.0],      # Adjacent Matrix
                 [1.0,0.0,1.0,0.0],            
-                [1.0,0.0,0.0,1.0],
-                [1.0,0.0,1.0,0.0]])     
-                
-Agent_fomation=matrix([[-1,1],     # fomation Matrix
-                        [1,1],
-                        [-1,-1],
-                        [1,-1]]) 
+                [1.0,1.0,0.0,1.0],
+                [0.0,0.0,0.0,0.0]])     
+                 
+Agent_fomation=matrix([[-1.0,0.0],           # fomation Matrix
+                        [0.0,1.0],
+                        [-1.0,1.0],
+                        [0.0,0.0]]) 
 
 Agent_postion=zeros((4,2))
 contorl_mat=zeros((4,2))
@@ -48,7 +49,7 @@ the for turtlebot3 will become a rectangle from the origin position
 
 
 
-def control_output(x,y,theta,iden=2):
+def control_output(x,y,theta,iden=2):      #feedback linearizaion
     if(iden==1):
         linear_c_vel=0.2*math.sqrt(math.pow(x, 2)+math.pow(y+0.1, 2))
     else:
@@ -76,37 +77,56 @@ def getKey():                             # get keyboard value
 if __name__=="__main__":                 # main function
     if os.name != 'nt':
         settings = termios.tcgetattr(sys.stdin)
-    rospy.init_node('turtlebot3_telep') #init a ros node
+    rospy.init_node('turtlebot3_telep')  #init a ros node
     target_linear_vel   = 0.0
     target_angular_vel  = 0.0   
     agent=[]
     for i in range(0,4):
-        tb=turtlebot(i)                    #init a instance of turtlebot class                 
+        tb=turtlebot(i)                  #init a instance of turtlebot class                 
         agent.append(tb)
-    ros_rate=rospy.Rate(50)             #set the cycle Time   
-
+    leader=agent[3]                      #set the no.3 robot as the leader
+    ros_rate=rospy.Rate(50)              #set the cycle Time   
     Laplace_mat=cal_Laplace(ad_mat)
-    print( Laplace_mat)
+    time.sleep(1)
     try:  
-        while(1):                     
-            key = getKey() #get the keyboard value when input is ctrl+c then exit 
+        while(1):                
+            leader.turtlebot_control(0.15,0.0)      # the motion of the leader is a circle
+            key = getKey()                          #get the keyboard value when input is ctrl+c then exit 
             if (key == '\x03'):
                     break
+       
+            trans_mat=matrix([[math.cos(leader.angle),math.sin(leader.angle)],           # fomation Matrix
+                              [-math.sin(leader.angle),math.cos(leader.angle)]])          #trans to leader frame
+            Formation_in_leader_flame = dot(Agent_fomation,trans_mat)
             for i in range(0,4):        
                 Agent_postion[i]=agent[i].position.reshape(1,2)
-            control_mat=dot(Laplace_mat,(Agent_postion-Agent_fomation))
-            for i in range(0,4):        
+            ref_position= leader.position.reshape(1,2)+Formation_in_leader_flame
+            
+            print dot(leader.velo,trans_mat)
+            Control_consensus=dot(Laplace_mat,Agent_postion-Formation_in_leader_flame)
+            Control_position=ref_position-Agent_postion
+            Control_velo=dot(leader.velo,trans_mat)+dot(Agent_fomation,
+                            matrix([[-math.sin(leader.angle),math.cos(leader.angle)],           # fomation Matrix
+                                     [-math.cos(leader.angle),-math.sin(leader.angle)]]))
+            K1=0.5
+            K2=2
+            K3=0.1
+            control_mat=K1*Control_consensus+K2*Control_position+K3*Control_velo
+            # for i in range(1):
+            #     print control_consensus[i]=control_consensus[i]+0.1*
+            for i in range(0,3):      
                 v,w=control_output(control_mat[i,0],control_mat[i,1],agent[i].angle,iden=2)
                 agent[i].turtlebot_control(v,w)
-    
+            ros_rate.sleep()
         
     except Exception as e:
         print(e)
         
 
     finally:
-        for i in range(0,4):
+        for i in range(0,3):
             agent[i].turtlebot_control(0,0)
+            leader.turtlebot_control(0,0)
 
 
     if os.name != 'nt':

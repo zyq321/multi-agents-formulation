@@ -75,7 +75,7 @@ class optimal_robot(turtlebot):
                              [x_init[1]]])
         self.s_hat=matrix([[x_init[0]],
                              [x_init[1]]])
-        self.Q=0.15* s_std**2*matlib.eye(2)
+        self.Q=s_std**2*matlib.eye(2)
         self.R=m_std**2*matlib.eye(2)
         self.R_inv=linalg.inv(self.R)
         self.K=matlib.eye(2)

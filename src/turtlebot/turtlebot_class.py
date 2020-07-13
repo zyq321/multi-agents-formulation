@@ -43,6 +43,7 @@ class turtlebot(object):
         self.bridge = CvBridge()
         self.rgb_image=zeros((height,width,3), uint8)
         self.depth_image=zeros((height,width,1), float32)
+        self.velo=matrix([[0.0,0.0]])
 
     def image_callback(self,data):
              self.rgb_image=cvtColor(self.bridge.imgmsg_to_cv2(data, "rgb8"),COLOR_BGR2RGB) 
@@ -54,6 +55,8 @@ class turtlebot(object):
             Agent_Quaternionn=data.pose.pose.orientation
             self.position[0,0]=data.pose.pose.position.x
             self.position[1,0]=data.pose.pose.position.y
+            self.velo[0,0]=data.twist.twist.linear.x
+            self.velo[0,1]=data.twist.twist.linear.y
             self.angle=tf.transformations.euler_from_quaternion([Agent_Quaternionn.x,Agent_Quaternionn.y,Agent_Quaternionn.z,Agent_Quaternionn.w])[2]
    
     def turtlebot_control(self,linear_vel,angle_vel):
