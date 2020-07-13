@@ -15,11 +15,11 @@ Formation Control of Nonholonomic Mobile Robots Without Position and Velocity Me
 multi_turtlebot3_optimal.launch和实现多机器人的协同分布式kalman filter（DKF）
 效果如下
 观测值：
-![image](https://github.com/zyq321/multi-agents-formulation/tree/master/gif/measurement.gif)
+![image](https://github.com/zyq321/multi-agents-formulation/tree/master/gif/measurement.png)
 单个机器人Kalman Filter
-![image](https://github.com/zyq321/multi-agents-formulation/tree/master/gif/KF.gif)
+![image](https://github.com/zyq321/multi-agents-formulation/tree/master/gif/KF.png)
 集群Distributed Kalman Filter
-![image](https://github.com/zyq321/multi-agents-formulation/tree/master/gif/DKF.gif)
+![image](https://github.com/zyq321/multi-agents-formulation/tree/master/gif/DKF.png)
 
 
 
