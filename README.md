@@ -9,8 +9,12 @@ multi_turtlebot3.launch和turtlebot3_formation.py实现移动机器人的简单�
 
 ![image](https://github.com/zyq321/multi-agents-formulation/blob/master/gif/formation_res.gif)
 
-multi_turtlebot3_visual.launch和turtlebot3_visual.py实现基于视觉的编队（基于Leader-following，还在开发中）具体算法可以参照
+multi_turtlebot3_visual.launch和turtlebot3_visual.py实现基于视觉的编队,具体算法可以参照
 Formation Control of Nonholonomic Mobile Robots Without Position and Velocity Measurements
+
+效果如下
+
+![image](https://github.com/zyq321/multi-agents-formulation/blob/master/gif/visual_fomation.gif)
 
 multi_turtlebot3_optimal.launch和实现多机器人的协同分布式kalman filter（DKF）
 效果如下

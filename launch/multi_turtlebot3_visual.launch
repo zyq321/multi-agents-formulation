@@ -1,24 +1,24 @@
 <launch>
-  <arg name="first_model" default="waffle_red1" doc="model type [burger, waffle, waffle_pi]"/>
-  <arg name="second_model" default="waffle_yellow" doc="model type [burger, waffle, waffle_pi]"/>
-  <arg name="third_model" default="waffle1" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="first_model" default="aruco_0" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="second_model" default="aruco_1" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="third_model" default="aruco_2" doc="model type [burger, waffle, waffle_pi]"/>
 
   <arg name="first_tb3"  default="tb3_0"/>
   <arg name="second_tb3" default="tb3_1"/>
   <arg name="third_tb3"  default="tb3_2"/>
 
-  <arg name="first_tb3_x_pos" default=" 0.0"/>
-  <arg name="first_tb3_y_pos" default=" 0.0"/>
+  <arg name="first_tb3_x_pos" default=" 1.0"/>
+  <arg name="first_tb3_y_pos" default=" -0.0"/>
   <arg name="first_tb3_z_pos" default=" 0.0"/>
   <arg name="first_tb3_yaw"   default=" -0.0"/>
 
-  <arg name="second_tb3_x_pos" default=" 0.5"/>
-  <arg name="second_tb3_y_pos" default=" -0.5"/>
+  <arg name="second_tb3_x_pos" default=" 0.0"/>
+  <arg name="second_tb3_y_pos" default=" 0.0"/>
   <arg name="second_tb3_z_pos" default=" 0.0"/>
-  <arg name="second_tb3_yaw"   default=" 2.00"/>
+  <arg name="second_tb3_yaw"   default=" 0.0"/>
 
   <arg name="third_tb3_x_pos" default=" -1.0"/>
-  <arg name="third_tb3_y_pos" default=" 0.0"/>
+  <arg name="third_tb3_y_pos" default=" -0.0"/>
   <arg name="third_tb3_z_pos" default=" 0.0"/>
   <arg name="third_tb3_yaw"   default=" 0.0"/>
 
@@ -32,7 +32,7 @@
   </include>  
 
   <group ns = "$(arg first_tb3)">
-    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find multi-agents-formulation)/urdf/turtlebot3_$(arg first_model).urdf.xacro" />
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find multi-agents-formulation)/urdf/aruco/turtlebot3_$(arg first_model).urdf.xacro" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
       <param name="publish_frequency" type="double" value="50.0" />
@@ -47,7 +47,7 @@
 
 
   <group ns = "$(arg second_tb3)">
-     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find multi-agents-formulation)/urdf/turtlebot3_$(arg second_model).urdf.xacro" />
+     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find multi-agents-formulation)/urdf/aruco/turtlebot3_$(arg second_model).urdf.xacro" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
       <param name="publish_frequency" type="double" value="50.0" />
@@ -62,7 +62,7 @@
 
 
   <group ns = "$(arg third_tb3)">
-    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find multi-agents-formulation)/urdf/turtlebot3_$(arg third_model).urdf.xacro" />
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find multi-agents-formulation)/urdf/aruco/turtlebot3_$(arg third_model).urdf.xacro" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
       <param name="publish_frequency" type="double" value="50.0" />

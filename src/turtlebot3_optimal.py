@@ -26,21 +26,20 @@ else:
 
 from turtlebot.turtlebot_class import*   
 from turtlebot.turtlebot_visual import*
+
+
+
 loc='left'
+
 font_dict={'fontsize': 14,\
          'fontweight' : 8.2,\
          'verticalalignment': 'baseline',\
          'horizontalalignment': loc}
 
-x_init=[0.0,0.0]
-target_3D=[(-0.080287736758833828, -0.028566797723180576, 0.72583121061325073), 
-           (-0.00090173848091813704, -0.028555051895741007, 0.72553277015686035), 
-           (-0.00090181819149380462, 0.050802424787484327, 0.72559690475463867), 
-           (-0.080294837593229251, 0.050823324169497162, 0.72589540481567383)]       
-lower_red = array([100, 43,46])
-upper_red = array([180, 255, 255])
+x_init=[0.0,0.0]     
 Is_measure=[0,0,0,0]
 m_color=['#FF0000','#0000FF','#CC9900','#66CC00']
+
 def getKey():                             # get keyboard value
     if os.name == 'nt':
       return msvcrt.getch()

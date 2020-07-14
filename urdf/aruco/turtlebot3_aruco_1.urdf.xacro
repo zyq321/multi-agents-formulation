@@ -8,6 +8,11 @@
   <xacro:property name="r200_cam_rgb_pz" value="0.013"/>
   <xacro:property name="r200_cam_depth_offset" value="0.01"/>
 
+
+
+
+
+  
   <link name="base_footprint"/>
 
   <joint name="base_joint" type="fixed">
@@ -86,7 +91,7 @@
       <geometry>
         <mesh filename="package://turtlebot3_description/meshes/wheels/right_tire.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="dark"/>
+      <material name="dark" />
     </visual>
 
     <collision>
@@ -189,6 +194,90 @@
                izz="0.001" />
     </inertial>
   </link>
+
+
+
+<gazebo reference="ball">
+     <material>Marker/White</material>
+     <turnGravityOff>false</turnGravityOff>
+ </gazebo>
+
+  <link name="ball">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+             <box size="0.15 0.15 1e-5"/>
+      </geometry>
+         <material name="m_Blue">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+    <lighting>1</lighting>
+  </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0.015 0 -0.0065" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0315" radius="0.055"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+
+
+  <joint name="base_scan_ball" type="fixed">
+    <parent link="base_scan"/>
+    <child link="ball"/>
+    <origin xyz="-0.14 0.0 -0.03" rpy="0 1.57 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+<gazebo reference="aruco">
+     <material>Marker/Marker1</material>
+     <turnGravityOff>false</turnGravityOff>
+ </gazebo>
+
+  <link name="aruco">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+             <box size="0.12 0.12 1e-5"/>
+      </geometry>
+         <material name="m_Blue">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0.015 0 -0.0065" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0315" radius="0.055"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+
+
+  <joint name="aruco_scan_ball" type="fixed">
+    <parent link="ball"/>
+    <child link="aruco"/>
+    <origin xyz="-0.0 0.0 -0.001" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
 
   <joint name="camera_joint" type="fixed">
     <origin xyz="0.064 -0.065 0.094" rpy="0 0 0"/>
