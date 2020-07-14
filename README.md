@@ -11,6 +11,8 @@ multi_turtlebot3.launch和turtlebot3_formation.py实现移动机器人的简单�
 
 multi_turtlebot3_visual.launch和turtlebot3_visual.py实现基于视觉的编队,具体算法可以参照
 Formation Control of Nonholonomic Mobile Robots Without Position and Velocity Measurements
+为了使用二维码作为纹理，需要把material中scripts中的文件放入/usr/share/gazebo-7/media/materials/scripts
+把material中textures中的图片放入/usr/share/gazebo-7/media/materials/textures
 
 效果如下
 

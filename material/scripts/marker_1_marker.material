@@ -1,0 +1,121 @@
+
+material Marker/Marker0
+{
+	technique
+	{
+		pass
+		{
+                  ambient 1 1 1 
+                  diffuse 1 1 1
+                  specular 1 1 1 128
+                  emissive 1 1 1
+			texture_unit
+			{
+				texture marker0.png
+			}
+		}
+
+
+	}
+}
+
+
+material Marker/Marker1
+{
+	technique
+	{
+		pass
+		{
+                  ambient 1 1 1 
+                  diffuse 1 1 1
+                  specular 1 1 1 128
+                  emissive 1 1 1
+			texture_unit
+			{
+				texture marker1.png
+			}
+		}
+
+
+	}
+}
+
+material Marker/Marker2
+{
+	technique
+	{
+		pass
+		{ ambient 1 1 1 
+                  diffuse 1 1 1
+                  specular 1 1 1 128
+                  emissive 1 1 1
+			texture_unit
+			{
+				texture marker2.png
+			}
+		}
+	}
+}
+
+material Marker/Marker3
+{
+	technique
+	{
+		pass
+		{
+      	          ambient 1 1 1 
+                  diffuse 1 1 1
+                  specular 1 1 1 128
+                  emissive 1 1 1
+			texture_unit
+			{
+				texture marker3.png
+			}
+		}
+	}
+}
+
+material Marker/White
+{
+  technique
+  {
+    pass ambient
+    {
+      ambient 1 1 1
+      diffuse 1 1 1
+      emissive 1 1 1
+      specular 1 1 1 128
+    }
+
+    pass light
+    {
+      ambient 1 1 1
+      diffuse 1 1 1
+      emissive 1 1 1
+      specular 1 1 1 128
+    }
+  }
+}
+
+
+material Marker/Red
+{
+  technique
+  {
+    pass ambient
+    {
+      ambient 1 1 1
+      diffuse 1 1 1
+      emissive 1 1 1
+      specular 1 1 1 128
+    }
+
+    pass light
+    {
+      ambient 1 1 1
+      diffuse 1 1 1
+      emissive 1 1 1
+      specular 1 1 1 128
+    }
+  }
+}
